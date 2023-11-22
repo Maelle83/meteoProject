@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+
+from scipy.stats import shapiro
 import numpy as np
 
 repertoire = '/home/mae/tpmaths'
@@ -39,7 +41,37 @@ Pluie = Pluie.reindex(sorted(Pluie.columns, key=lambda x: int(x)), axis=1)
 Vent = Vent.reindex(sorted(Vent.columns, key=lambda x: int(x)), axis=1)
 Température = Température.reindex(sorted(Température.columns, key=lambda x: int(x)), axis=1)
 
+# VERIFIER LA NORMALITE DES DONNEES :
+
+for col in Soleil.columns:
+    stat, p_value=shapiro(Soleil[col])
+
+    if (p_value > 0.05) :
+        print("UV", col)
+        print("warning : the sample doesn't follow the normality")
+
+
+for col in Vent.columns:
+    stat,p_value = shapiro(Vent[col])
+
+    if (p_value > 0.05):
+        print("Vent", col)
+        print("warning : the sample doesn't follow the normality")
+
+for col in Température.columns:
+    stat,p_value = shapiro(Température[col])
+    if (p_value > 0.05):
+        print("température", col)
+        print("warning : the sample doesn't follow the normality")
+for col in Pluie.columns:
+    stat,p_value = shapiro(Pluie[col])
+    if (p_value > 0.05):
+
+        print("pluie",col)
+        print("warning : the sample doesn't follow the normality")
+
 # CORRELATIONS ENTRE LES ANNEES
+
 correlation_uv = Soleil.corr()
 correlation_precipitation = Pluie.corr()
 correlation_mistral = Vent.corr()
@@ -85,5 +117,5 @@ plt.xticks(range(len(correlation_temperature.columns)), correlation_temperature.
 plt.yticks(range(len(correlation_temperature.index)), correlation_temperature.index)
 
 plt.tight_layout()
-plt.show()
+
 
