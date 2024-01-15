@@ -47,6 +47,7 @@ Température = Température.reindex(sorted(Température.columns, key=lambda x: i
 ###########  CORRELATION ENTRE LES ANNEES ###########
 #####################################################
 
+
 correlation_uv = Soleil.corr()
 correlation_precipitation = Pluie.corr()
 correlation_mistral = Vent.corr()
@@ -142,6 +143,47 @@ for i, j in zip(*np.triu(significatif_temperature, k=1)):
      print(f"{correlation_temperature.index[i]} - {correlation_temperature.columns[j]}")
 
 
+
+#######################################################
+####### ANALYSE EN COMPOSANTES PRINCIPALES ############
+######################################################
+Température_transposed= Température.transpose()
+
+# Centrer les données
+donnees_centrees = Température_transposed - Température_transposed.mean()
+
+# Calculer la matrice de covariance
+matrice_covariance = np.cov(donnees_centrees, rowvar=False)
+
+# Calculer les valeurs propres et les vecteurs propres
+valeurs_propres, vecteurs_propres = np.linalg.eig(matrice_covariance)
+
+# Trier les valeurs propres et les vecteurs propres
+indices_tri = np.argsort(valeurs_propres)[::-1]
+valeurs_propres = valeurs_propres[indices_tri]
+vecteurs_propres = vecteurs_propres[:, indices_tri]
+
+# Projeter les données sur les composantes principales
+composantes_principales = np.dot(donnees_centrees, vecteurs_propres)
+
+# Créer un DataFrame pour les composantes principales
+df_pca = pd.DataFrame(data=composantes_principales, columns=[f'PC{i+1}' for i in range(composantes_principales.shape[1])])
+
+# Ajouter les noms de lignes comme étiquettes
+df_pca['Années'] = Température_transposed.index
+print(df_pca)
+# Visualisation en 2D avec étiquettes
+plt.figure(figsize=(10, 6))
+plt.scatter(df_pca['PC1'], df_pca['PC2'], alpha=0.7)
+
+# Ajouter les étiquettes pour chaque point
+for i, ligne in enumerate(df_pca['Années']):
+    plt.text(df_pca['PC1'][i], df_pca['PC2'][i], ligne, fontsize=8, ha='left', va='bottom')
+
+plt.title('Analyse en composantes principales des températures du mois de Mai à Toulon')
+plt.xlabel('Composante Principale 1 (PC1)')
+plt.ylabel('Composante Principale 2 (PC2)')
+plt.show()
 
 #####################################################
 ############# MODELE PROBABILISTE     ###############
